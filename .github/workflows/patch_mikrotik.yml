@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TZ: 'Asia/Shanghai'
-      LATEST_STABLE_VERSION_URL: 'https://mikrotik.com/download/archive#tab-stable'
+      LATEST_STABLE_VERSION_URL: 'https://mikrotik.com/download/archive#c-stable-v6_49_11'
       LATEST_VERSION: "6.49.19"
       CUSTOM_LICENSE_PRIVATE_KEY: ${{ secrets.CUSTOM_LICENSE_PRIVATE_KEY }}
       CUSTOM_LICENSE_PUBLIC_KEY: ${{ secrets.CUSTOM_LICENSE_PUBLIC_KEY }}
