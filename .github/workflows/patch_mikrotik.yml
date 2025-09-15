@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TZ: 'Asia/Shanghai'
-      LATEST_STABLE_VERSION_URL: ''
-      LATEST_VERSION: "6.49.19"
+      LATEST_STABLE_VERSION_URL: 'https://upgrade.mikrotik.com/routeros/NEWESTa7.stable'
+      LATEST_VERSION: "7.19.4"
       CUSTOM_LICENSE_PRIVATE_KEY: ${{ secrets.CUSTOM_LICENSE_PRIVATE_KEY }}
       CUSTOM_LICENSE_PUBLIC_KEY: ${{ secrets.CUSTOM_LICENSE_PUBLIC_KEY }}
       CUSTOM_NPK_SIGN_PRIVATE_KEY: ${{ secrets.CUSTOM_NPK_SIGN_PRIVATE_KEY }}
