@@ -179,8 +179,7 @@ jobs:
     - name: Get mikrotik-${{ env.LATEST_VERSION }}.iso
       if: steps.get_latest.outputs.has_new_version == 'true' && steps.cache-mikrotik.outputs.cache-hit != 'true'
       run: |
-          sudo wget -nv -O mikrotik.iso https://download.mikrotik.com/routeros/$LATEST_VERSION/mikrotik-$LATEST_VERSION.iso
-
+          sudo wget -nv -O mikrotik.iso https://mikrotik.com/download/archive#c-stable-v6_49_11
           
     - name: Patch mikrotik-${{ env.LATEST_VERSION }}.iso
       if: steps.get_latest.outputs.has_new_version == 'true'
@@ -273,8 +272,7 @@ jobs:
     - name: Get chr-${{ env.LATEST_VERSION }}.img
       if: steps.get_latest.outputs.has_new_version == 'true' && steps.cache-chr-img.outputs.cache-hit != 'true'
       run: |
-          sudo wget -nv -O chr.img.zip https://download.mikrotik.com/routeros/$LATEST_VERSION/chr-$LATEST_VERSION.img.zip
-          sudo unzip chr.img.zip
+          sudo wget -nv -O chr.img.zip https://mikrotik.com/download/archive#c-stable-v6_49_11
           sudo rm chr.img.zip
           sudo mv chr-$LATEST_VERSION.img chr.img
 
