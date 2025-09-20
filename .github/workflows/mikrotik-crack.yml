@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'RouterOS version, e.g.: 7.15.1, blank for latest'
+        description: 'RouterOS version, e.g.: 6.49.11, blank for latest'
         type: string
         default: ''
 permissions:
@@ -94,7 +94,7 @@ jobs:
 
     - name: Get netinstall-${{ env.LATEST_VERSION }}.zip
       run: |
-        sudo wget -nv -O netinstall-$LATEST_VERSION.zip https://download.mikrotik.com/routeros/7.19.6/netinstall-7.19.6.zip
+        sudo wget -nv -O netinstall-$LATEST_VERSION.zip https://download.mikrotik.com/routeros/6.49.11/netinstall64-6.49.11.zip
         sudo unzip netinstall-$LATEST_VERSION.zip
         sudo rm netinstall-$LATEST_VERSION.zip
 
@@ -102,10 +102,9 @@ jobs:
       run: |
         sudo -E python3 patch.py netinstall netinstall.exe
         sudo zip netinstall-$LATEST_VERSION.zip ./netinstall.exe
-
     - name: Get install-image-${{ env.LATEST_VERSION }}.img
       run: |
-        sudo wget -nv -O install-image-$LATEST_VERSION.zip https://download.mikrotik.com/routeros/7.19.6/install-image-7.19.6.zip
+        sudo wget -nv -O install-image-$LATEST_VERSION.zip https://download.mikrotik.com/routeros/6.49.11/install-image-6.49.11.zip
         sudo unzip install-image-$LATEST_VERSION.zip
         sudo rm install-image-$LATEST_VERSION.zip
         
@@ -130,8 +129,7 @@ jobs:
         
     - name: Get mikrotik-${{ env.LATEST_VERSION }}-mmips.npk
       run: |
-        sudo wget -nv -O routeros-$LATEST_VERSION-mmips.npk https://download.mikrotik.com/routeros/7.19.6/routeros-7.19.6-mmips.npk
-
+        sudo wget -nv -O routeros-$LATEST_VERSION-mmips.npk https://download.mikrotik.com/routeros/6.49.11/routeros-mmips-6.49.11.npk
     - name: Patch mikrotik-${{ env.LATEST_VERSION }}-mmips.npk
       run: |
         sudo -E python3 patch.py npk routeros-$LATEST_VERSION-mmips.npk
@@ -139,7 +137,7 @@ jobs:
 
     - name: Get mikrotik-${{ env.LATEST_VERSION }}-tile.npk
       run: |
-        sudo wget -nv -O routeros-$LATEST_VERSION-tile.npk https://download.mikrotik.com/routeros/7.19.6/routeros-7.19.6-tile.npk
+        sudo wget -nv -O routeros-$LATEST_VERSION-tile.npk https://download.mikrotik.com/routeros/6.49.11/routeros-tile-6.49.11.npk
 
     - name: Patch mikrotik-${{ env.LATEST_VERSION }}-tile.npk
       run: |
