@@ -1,10 +1,10 @@
-name: Test Mikrotik RouterOS Files
+name: Mikrotik RouterOS Auto Download
 
 on:
   workflow_dispatch:
 
 jobs:
-  download-test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Get latest RouterOS 7 version
@@ -38,6 +38,18 @@ jobs:
           echo "Downloading: $URL"
           wget -nv -O routeros-${VERSION}-mmips.npk "$URL"
 
+      - name: Download TILE
+        run: |
+          URL="https://download.mikrotik.com/routeros/${VERSION}/routeros-${VERSION}-tile.npk"
+          echo "Downloading: $URL"
+          wget -nv -O routeros-${VERSION}-tile.npk "$URL"
+
+      - name: Download CHR
+        run: |
+          URL="https://download.mikrotik.com/routeros/${VERSION}/chr-${VERSION}.img.zip"
+          echo "Downloading: $URL"
+          wget -nv -O chr-${VERSION}.img.zip "$URL"
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -47,4 +59,20 @@ jobs:
             mikrotik-*.iso
             install-image-*.zip
             routeros-*-mmips.npk
+            routeros-*-tile.npk
+            chr-*.img.zip
           retention-days: 3
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "MikroTik ${{ env.VERSION }}"
+          tag_name: ${{ env.VERSION }}
+          body: "Auto-downloaded MikroTik RouterOS version ${{ env.VERSION }}"
+          files: |
+            netinstall-${{ env.VERSION }}.zip
+            mikrotik-${{ env.VERSION }}.iso
+            install-image-${{ env.VERSION }}.zip
+            routeros-${{ env.VERSION }}-mmips.npk
+            routeros-${{ env.VERSION }}-tile.npk
+            chr-${{ env.VERSION }}.img.zip
