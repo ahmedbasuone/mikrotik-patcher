@@ -1,43 +1,50 @@
-name: Test MikroTik Downloads (Latest)
+name: Test Mikrotik RouterOS Files
 
 on:
-  workflow_dispatch: # تشغيل يدوي من GitHub Actions
+  workflow_dispatch:
 
 jobs:
-  download-latest:
+  download-test:
     runs-on: ubuntu-latest
     steps:
       - name: Get latest RouterOS 7 version
         run: |
-          VERSION=$(curl -s https://upgrade.mikrotik.com/routeros/LATEST.7)
+          RAW=$(curl -s https://upgrade.mikrotik.com/routeros/LATEST.7)
+          VERSION=$(echo "$RAW" | awk '{print $1}')   # ناخد أول كلمة فقط
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "Latest version is $VERSION"
 
-      - name: Create artifacts folder
-        run: mkdir -p artifacts
-
-      - name: Download netinstall
+      - name: Download Netinstall
         run: |
           URL="https://download.mikrotik.com/routeros/${VERSION}/netinstall-${VERSION}.zip"
-          wget --spider "$URL" && wget -nv -O artifacts/netinstall-${VERSION}.zip "$URL"
+          echo "Downloading: $URL"
+          wget -nv -O netinstall-${VERSION}.zip "$URL"
 
-      - name: Download install-image
+      - name: Download ISO
+        run: |
+          URL="https://download.mikrotik.com/routeros/${VERSION}/mikrotik-${VERSION}.iso"
+          echo "Downloading: $URL"
+          wget -nv -O mikrotik-${VERSION}.iso "$URL"
+
+      - name: Download Install-Image
         run: |
           URL="https://download.mikrotik.com/routeros/${VERSION}/install-image-${VERSION}.zip"
-          wget --spider "$URL" && wget -nv -O artifacts/install-image-${VERSION}.zip "$URL"
+          echo "Downloading: $URL"
+          wget -nv -O install-image-${VERSION}.zip "$URL"
 
-      - name: Download mmips
+      - name: Download MMIPS
         run: |
           URL="https://download.mikrotik.com/routeros/${VERSION}/routeros-${VERSION}-mmips.npk"
-          wget --spider "$URL" && wget -nv -O artifacts/routeros-${VERSION}-mmips.npk "$URL"
-
-      - name: Download tile
-        run: |
-          URL="https://download.mikrotik.com/routeros/${VERSION}/all_packages-tile-${VERSION}.zip"
-          wget --spider "$URL" && wget -nv -O artifacts/all_packages-tile-${VERSION}.zip "$URL"
+          echo "Downloading: $URL"
+          wget -nv -O routeros-${VERSION}-mmips.npk "$URL"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: mikrotik-${{ env.VERSION }}
-          path: artifacts/
+          name: mikrotik-files
+          path: |
+            netinstall-*.zip
+            mikrotik-*.iso
+            install-image-*.zip
+            routeros-*-mmips.npk
+          retention-days: 3
