@@ -1,0 +1,12 @@
+VERSION="7.19.6"
+FILE="netinstall-$VERSION.zip"
+URL="https://download.mikrotik.com/routeros/$VERSION/$FILE"
+
+# Check if URL exists
+if wget --spider "$URL"; then
+  echo "File found: $URL"
+  wget -nv -O $FILE "$URL"
+else
+  echo "File not found: $URL"
+  exit 1
+fi
