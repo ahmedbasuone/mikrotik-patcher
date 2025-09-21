@@ -107,7 +107,7 @@ jobs:
 
     - name: Get mikrotik-${{ env.LATEST_VERSION }}.iso
       run: |
-        sudo wget -nv -O mikrotik-$LATEST_VERSION.iso https://download.mikrotik.com/routeros/${VERSION}/mikrotik-${VERSION}.iso
+        sudo wget -nv -O mikrotik-$LATEST_VERSION.iso https://download.mikrotik.com/routeros/6.49.19/mikrotik-6.49.19.iso
 
     - name: Patch mikrotik-${{ env.LATEST_VERSION }}.iso
       run: |
@@ -156,7 +156,7 @@ jobs:
 
     - name: Get chr-${{ env.LATEST_VERSION }}.img
       run: |
-        sudo wget -nv -O chr-$LATEST_VERSION.img.zip https://download.mikrotik.com/routeros/${VERSION}/chr-${VERSION}.img.zip
+        sudo wget -nv -O chr-$LATEST_VERSION.img.zip https://download.mikrotik.com/routeros/6.49.19/chr-6.49.19.img.zip
         sudo unzip chr-$LATEST_VERSION.img.zip
         sudo rm chr-$LATEST_VERSION.img.zip
         
@@ -201,7 +201,7 @@ jobs:
 
     - name: Get install-image-${{ env.LATEST_VERSION }}.img
       run: |
-        sudo wget -nv -O install-image-$LATEST_VERSION.zip https://download.mikrotik.com/routeros/${VERSION}/install-image-${VERSION}.zip
+        sudo wget -nv -O install-image-$LATEST_VERSION.zip https://download.mikrotik.com/routeros/6.49.19/install-image-6.49.19.zip
         sudo unzip install-image-$LATEST_VERSION.zip
         sudo rm install-image-$LATEST_VERSION.zip
         
@@ -226,7 +226,7 @@ jobs:
         
     - name: Get mikrotik-${{ env.LATEST_VERSION }}-mmips.npk
       run: |
-        sudo wget -nv -O routeros-$LATEST_VERSION-mmips.npk https://download.mikrotik.com/routeros/${VERSION}/routeros-${VERSION}-mmips.npk
+        sudo wget -nv -O routeros-$LATEST_VERSION-mmips.npk https://download.mikrotik.com/routeros/6.49.19/routeros-mmips-6.49.19.npk
 
     - name: Patch mikrotik-${{ env.LATEST_VERSION }}-mmips.npk
       run: |
