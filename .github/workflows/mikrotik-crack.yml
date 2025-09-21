@@ -94,9 +94,11 @@ jobs:
         echo Latest Version:$LATEST_VERSION
         echo "LATEST_VERSION=${LATEST_VERSION}" >> $GITHUB_ENV
 
-    - name: Get netinstall-${{ env.LATEST_VERSION }}.zip
-      run: |
-        sudo wget -nv -O netinstall-$LATEST_VERSION.zip https://download.mikrotik.com/routeros/$LATEST_VERSION/netinstall-$LATEST_VERSION.zip
+    - name: Download Netinstall
+        run: |
+          URL="https://download.mikrotik.com/routeros/${VERSION}/netinstall-${VERSION}.zip"
+          echo "Downloading: $URL"
+          wget -nv -O netinstall-${VERSION}.zip "$URL"
         sudo unzip netinstall-$LATEST_VERSION.zip
         sudo rm netinstall-$LATEST_VERSION.zip
 
@@ -104,11 +106,11 @@ jobs:
       run: |
         sudo -E python3 patch.py netinstall netinstall.exe
         sudo zip netinstall-$LATEST_VERSION.zip ./netinstall.exe
-
-    - name: Get mikrotik-${{ env.LATEST_VERSION }}.iso
-      run: |
-        sudo wget -nv -O mikrotik-$LATEST_VERSION.iso https://download.mikrotik.com/routeros/$LATEST_VERSION/mikrotik-$LATEST_VERSION.iso
-
+    - name: Download ISO
+        run: |
+          URL="https://download.mikrotik.com/routeros/${VERSION}/mikrotik-${VERSION}.iso"
+          echo "Downloading: $URL"
+          wget -nv -O mikrotik-${VERSION}.iso "$URL"
     - name: Patch mikrotik-${{ env.LATEST_VERSION }}.iso
       run: |
         sudo apt-get install -y mkisofs > /dev/null
@@ -154,9 +156,11 @@ jobs:
                     ./new_iso
         sudo rm -rf ./new_iso
 
-    - name: Get chr-${{ env.LATEST_VERSION }}.img
-      run: |
-        sudo wget -nv -O chr-$LATEST_VERSION.img.zip https://download.mikrotik.com/routeros/$LATEST_VERSION/chr-$LATEST_VERSION.img.zip
+    - name: Download Install-Image
+        run: |
+          URL="https://download.mikrotik.com/routeros/${VERSION}/install-image-${VERSION}.zip"
+          echo "Downloading: $URL"
+          wget -nv -O install-image-${VERSION}.zip "$URL"
         sudo unzip chr-$LATEST_VERSION.img.zip
         sudo rm chr-$LATEST_VERSION.img.zip
         
@@ -199,9 +203,11 @@ jobs:
         sudo rm chr-$LATEST_VERSION.vdi
         sudo rm chr-$LATEST_VERSION.img
 
-    - name: Get install-image-${{ env.LATEST_VERSION }}.img
-      run: |
-        sudo wget -nv -O install-image-$LATEST_VERSION.zip https://download.mikrotik.com/routeros/$LATEST_VERSION/install-image-$LATEST_VERSION.zip
+    - name: Download Install-Image
+        run: |
+          URL="https://download.mikrotik.com/routeros/${VERSION}/install-image-${VERSION}.zip"
+          echo "Downloading: $URL"
+          wget -nv -O install-image-${VERSION}.zip "$URL"
         sudo unzip install-image-$LATEST_VERSION.zip
         sudo rm install-image-$LATEST_VERSION.zip
         
@@ -224,9 +230,11 @@ jobs:
         sudo zip install-image-$LATEST_VERSION.zip ./install-image-$LATEST_VERSION.img
         sudo rm ./install-image-$LATEST_VERSION.img
         
-    - name: Get mikrotik-${{ env.LATEST_VERSION }}-mmips.npk
-      run: |
-        sudo wget -nv -O routeros-$LATEST_VERSION-mmips.npk https://download.mikrotik.com/routeros/$LATEST_VERSION/routeros-$LATEST_VERSION-mmips.npk
+    - name: Download MMIPS
+        run: |
+          URL="https://download.mikrotik.com/routeros/${VERSION}/routeros-${VERSION}-mmips.npk"
+          echo "Downloading: $URL"
+          wget -nv -O routeros-${VERSION}-mmips.npk "$URL"
 
     - name: Patch mikrotik-${{ env.LATEST_VERSION }}-mmips.npk
       run: |
