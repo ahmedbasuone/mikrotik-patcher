@@ -61,7 +61,7 @@ jobs:
         channel: [stable, testing]
     env:
       TZ: 'Asia/Shanghai'
-      LATEST_VERSION_URL: 'https://upgrade.mikrotik.com/routeros/NEWESTa7.stable'
+      LATEST_VERSION_URL: 'https://upgrade.mikrotik.com/routeros/NEWESTa6.stable'
       LATEST_VERSION: ""
       CUSTOM_LICENSE_PRIVATE_KEY: ${{ secrets.CUSTOM_LICENSE_PRIVATE_KEY }}
       CUSTOM_LICENSE_PUBLIC_KEY: ${{ secrets.CUSTOM_LICENSE_PUBLIC_KEY }}
@@ -96,8 +96,7 @@ jobs:
 
     - name: Get netinstall-${{ env.LATEST_VERSION }}.zip
       run: |
-        sudo wget -nv -O netinstall-$LATEST_VERSION.zip https://download.mikrotik.com/routeros/7.19.6/netinstall-7.19.6.zip
-
+        sudo wget -nv -O netinstall-$LATEST_VERSION.zip https://download.mikrotik.com/routeros/6.49.19/netinstall-6.49.19.zip
         sudo unzip netinstall-$LATEST_VERSION.zip
         sudo rm netinstall-$LATEST_VERSION.zip
 
