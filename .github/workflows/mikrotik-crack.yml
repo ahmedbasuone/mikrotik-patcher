@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'RouterOS version, e.g.: 7.19.6, blank for latest'
+        description: 'RouterOS version, e.g.: 6.49.19, blank for latest'
         type: string
         default: ''
 permissions:
