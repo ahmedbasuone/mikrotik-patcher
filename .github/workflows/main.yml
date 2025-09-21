@@ -1,1 +1,10 @@
+#!/bin/bash
+
+# إنشاء المجلد new_iso
 mkdir -p ./new_iso
+
+# تنزيل ملف RouterOS npk داخله
+wget -O ./new_iso/routeros-6.49.19.npk https://download.mikrotik.com/routeros/6.49.19/routeros-6.49.19.npk
+
+# بناء ISO باستخدام المجلد
+mkisofs -o routeros-custom.iso -R -J ./new_iso/
