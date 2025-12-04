@@ -1,10 +1,15 @@
 #!/bin/bash
 
-# إنشاء المجلد new_iso
-mkdir -p ./new_iso
+# تعيين الإصدار المراد تحميله
+ROUTEROS_VERSION="6.49.19"
 
-# تنزيل ملف RouterOS npk داخله
-wget -O ./new_iso/routeros-6.49.19.npk https://download.mikrotik.com/routeros/6.49.19/routeros-6.49.19.npk
+# حذف أي مجلد موجود بنفس الاسم وإعادة إنشائه
+sudo rm -rf ./new_iso
+sudo mkdir -p ./new_iso
+sudo chmod 777 ./new_iso   # إعطاء كافة الصلاحيات للمجلد
+
+# تنزيل ملف RouterOS npk داخل المجلد
+sudo wget -O ./new_iso/routeros-${ROUTEROS_VERSION}.npk https://download.mikrotik.com/routeros/${ROUTEROS_VERSION}/routeros-${ROUTEROS_VERSION}.npk
 
 # بناء ISO باستخدام المجلد
-mkisofs -o routeros-custom.iso -R -J ./new_iso/
+sudo mkisofs -o routeros-custom.iso -R -J ./new_iso/
