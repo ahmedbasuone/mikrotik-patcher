@@ -76,6 +76,12 @@ jobs:
       with:
         python-version: '3.11' 
 
+    - name: Prepare new_iso folder
+      run: |
+        mkdir -p ./new_iso
+        chmod 755 ./new_iso
+        chmod -R u+rwX ./new_iso
+
     - name: Download Artifact
       uses: actions/download-artifact@v4
       with:
