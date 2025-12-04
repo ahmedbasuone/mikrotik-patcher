@@ -1,7 +1,12 @@
 #!/bin/bash
 
-# تعيين الإصدار المراد تحميله
-ROUTEROS_VERSION="6.49.19"
+# قراءة الإصدار من متغير البيئة الذي تحدده الـ GitHub Actions
+ROUTEROS_VERSION="${LATEST_VERSION}"
+
+# التأكد من وجود قيمة، وإذا لم توجد يمكن تعيين نسخة افتراضية
+if [ -z "$ROUTEROS_VERSION" ]; then
+    ROUTEROS_VERSION="6.49.19"  # النسخة الافتراضية
+fi
 
 # حذف أي مجلد موجود بنفس الاسم وإعادة إنشائه
 sudo rm -rf ./new_iso
