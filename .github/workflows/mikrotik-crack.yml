@@ -121,7 +121,6 @@ jobs:
         # إعداد المجلدات المؤقتة
         sudo mkdir ./iso
         sudo mount -o loop,ro mikrotik-$LATEST_VERSION.iso ./iso
-        sudo mkdir ./new_iso
         sudo cp -r ./iso/* ./new_iso/
         sudo rsync -a ./iso/ ./new_iso/
         sudo umount ./iso
