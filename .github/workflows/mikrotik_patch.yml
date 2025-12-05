@@ -128,12 +128,10 @@ jobs:
           rm install-image-$LATEST_VERSION.zip
 
       - name: Download mmips npk
-  run: |
-    MMIPS_URL="https://download.mikrotik.com/routeros/$LATEST_VERSION/routeros-$LATEST_VERSION-mmips.npk"
-    echo "Downloading $MMIPS_URL"
-    
-    # جرب التنزيل وإذا لم يكن موجودًا تجاهل الخطأ
-    wget -nv -O routeros-$LATEST_VERSION-mmips.npk $MMIPS_URL || echo "MMIPS file not found, skipping..."
+        run: |
+          MMIPS_URL="https://download.mikrotik.com/routeros/$LATEST_VERSION/routeros-$LATEST_VERSION-mmips.npk"
+          echo "Downloading $MMIPS_URL"
+          wget -nv -O routeros-$LATEST_VERSION-mmips.npk $MMIPS_URL
 
       # -------------------- Patch الملفات --------------------
       - name: Patch netinstall.exe
