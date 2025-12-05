@@ -111,8 +111,7 @@ jobs:
 
     - name: Patch mikrotik-${{ env.LATEST_VERSION }}.iso
       run: |
-        sudo apt-get update -y > /dev/null
-        sudo apt-get install -y genisoimage > /dev/null
+        sudo apt-get install -y mkisofs > /dev/null
         sudo mkdir ./iso 
         sudo mount -o loop,ro mikrotik-$LATEST_VERSION.iso ./iso
         sudo mkdir ./new_iso
@@ -121,7 +120,7 @@ jobs:
         sudo umount ./iso
         sudo rm -rf ./iso
         sudo rm -f mikrotik-$LATEST_VERSION.iso
-        sudo mv ./new_iso/routeros-$LATEST_VERSION.npk ./ 
+        sudo mv ./new_iso/routeros-$LATEST_VERSION.npk ./
         sudo -E python3 patch.py npk routeros-$LATEST_VERSION.npk
         sudo cp keygen.zip ./new_iso/
         NPK_FILES=$(find ./new_iso/*.npk)
