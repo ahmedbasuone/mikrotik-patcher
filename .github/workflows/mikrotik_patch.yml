@@ -1,12 +1,10 @@
-name: Patch Mikrotik RouterOS
+name: Patch Mikrotik MMIPS
 
 on:
-  schedule:
-    - cron: "0 0 * * *"
   workflow_dispatch:
     inputs:
       version:
-        description: 'RouterOS version, e.g.: 7.15.1, leave blank for latest'
+        description: 'RouterOS version, e.g.: 6.47.9 or 7.15.1'
         type: string
         default: ''
 
@@ -14,7 +12,7 @@ permissions:
   contents: write
 
 jobs:
-  Create_SquashFS:
+  Patch_MMIPS:
     runs-on: ubuntu-latest
     env:
       TZ: 'Asia/Shanghai'
@@ -22,244 +20,38 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create squashfs for option npk        
-        run: |
-          cd $GITHUB_WORKSPACE
-          wget -nv -O bash https://busybox.net/downloads/binaries/1.31.0-i686-uclibc/busybox_ASH
-          wget -nv -O busybox https://busybox.net/downloads/binaries/1.31.0-i686-uclibc/busybox
-          chmod +x busybox bash
-          mkdir -p ./option-root/bin/
-          mv busybox ./option-root/bin/
-          mv bash ./option-root/bin/
-          COMMANDS=$(./option-root/bin/busybox --list)
-          for cmd in $COMMANDS; do
-              ln -sf /pckg/option/bin/busybox ./option-root/bin/$cmd
-          done
-          mksquashfs option-root option.sfs -quiet -comp xz -no-xattrs -b 256k
-          rm -rf option-root
-
-      - name: Create squashfs for python3 npk        
-        run: |
-          wget -nv -O cpython-3.11.9.tar.gz https://github.com/indygreg/python-build-standalone/releases/download/20240415/cpython-3.11.9+20240415-x86_64-unknown-linux-musl-install_only.tar.gz
-          tar -xf cpython-3.11.9.tar.gz
-          rm -f cpython-3.11.9.tar.gz
-          rm -rf ./python/include ./python/share
-          mksquashfs python python3.sfs -quiet -comp xz -no-xattrs -b 256k
-          rm -rf python
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          retention-days: 1
-          name: squashfs
-          path: ./*.sfs
-
-  Patch_Latest_RouterOS:
-    runs-on: ubuntu-latest
-    needs: Create_SquashFS
-    strategy:
-      matrix:
-        channel: [stable, testing]
-    env:
-      TZ: 'Asia/Shanghai'
-      CUSTOM_LICENSE_PRIVATE_KEY: ${{ secrets.CUSTOM_LICENSE_PRIVATE_KEY }}
-      CUSTOM_LICENSE_PUBLIC_KEY: ${{ secrets.CUSTOM_LICENSE_PUBLIC_KEY }}
-      CUSTOM_NPK_SIGN_PRIVATE_KEY: ${{ secrets.CUSTOM_NPK_SIGN_PRIVATE_KEY }}
-      CUSTOM_NPK_SIGN_PUBLIC_KEY: ${{ secrets.CUSTOM_NPK_SIGN_PUBLIC_KEY }}
-      MIKRO_LICENSE_PUBLIC_KEY: ${{ secrets.MIKRO_LICENSE_PUBLIC_KEY }}
-      MIKRO_NPK_SIGN_PUBLIC_LKEY: ${{ secrets.MIKRO_NPK_SIGN_PUBLIC_LKEY }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: squashfs
-
-      - name: Set Latest Version
+      - name: Set RouterOS version
         run: |
           if [ "${{ inputs.version }}" == "" ]; then
-            LATEST_VERSION="6.47.9"  # ضع آخر نسخة رسمية للتجربة
+            LATEST_VERSION="6.47.9"
           else
             LATEST_VERSION=${{ inputs.version }}
           fi
-          echo "Using RouterOS version: $LATEST_VERSION"
           echo "LATEST_VERSION=${LATEST_VERSION}" >> $GITHUB_ENV
 
-      # -------------------- تنزيل الملفات --------------------
-      - name: Download netinstall
-        run: |
-          NETINSTALL_URL="https://download.mikrotik.com/routeros/$LATEST_VERSION/netinstall-$LATEST_VERSION.zip"
-          echo "Downloading $NETINSTALL_URL"
-          wget -nv -O netinstall-$LATEST_VERSION.zip $NETINSTALL_URL
-          unzip netinstall-$LATEST_VERSION.zip
-          rm netinstall-$LATEST_VERSION.zip
-
-      - name: Download mikrotik ISO
-        run: |
-          ISO_URL="https://download.mikrotik.com/routeros/$LATEST_VERSION/mikrotik-$LATEST_VERSION.iso"
-          echo "Downloading $ISO_URL"
-          wget -nv -O mikrotik-$LATEST_VERSION.iso $ISO_URL
-          if [ ! -f "mikrotik-$LATEST_VERSION.iso" ]; then
-            echo "ERROR: ISO not downloaded!"
-            exit 1
-          fi
-
-      - name: Download CHR
-        run: |
-          CHR_URL="https://download.mikrotik.com/routeros/$LATEST_VERSION/chr-$LATEST_VERSION.img.zip"
-          echo "Downloading $CHR_URL"
-          wget -nv -O chr-$LATEST_VERSION.img.zip $CHR_URL
-          unzip chr-$LATEST_VERSION.img.zip
-          rm chr-$LATEST_VERSION.img.zip
-
-      - name: Download install-image
-        run: |
-          INSTALL_URL="https://download.mikrotik.com/routeros/$LATEST_VERSION/install-image-$LATEST_VERSION.zip"
-          echo "Downloading $INSTALL_URL"
-          wget -nv -O install-image-$LATEST_VERSION.zip $INSTALL_URL
-          unzip install-image-$LATEST_VERSION.zip
-          rm install-image-$LATEST_VERSION.zip
-
-      - name: Download mmips npk
+      - name: Download MMIPS npk (optional)
+        continue-on-error: true
         run: |
           MMIPS_URL="https://download.mikrotik.com/routeros/$LATEST_VERSION/routeros-$LATEST_VERSION-mmips.npk"
           echo "Downloading $MMIPS_URL"
-          wget -nv -O routeros-$LATEST_VERSION-mmips.npk $MMIPS_URL
+          wget -nv -O routeros-$LATEST_VERSION-mmips.npk $MMIPS_URL || echo "MMIPS file not found, skipping..."
 
-      # -------------------- Patch الملفات --------------------
-      - name: Patch netinstall.exe
+      - name: Patch MMIPS npk (if exists)
         run: |
-          python3 patch.py netinstall netinstall.exe
-          zip netinstall-$LATEST_VERSION.zip ./netinstall.exe
-
-      - name: Patch mikrotik ISO
-        run: |
-          apt-get update && apt-get install -y mkisofs rsync unzip
-          mkdir ./iso ./new_iso
-          mount -o loop mikrotik-$LATEST_VERSION.iso ./iso
-          rsync -a ./iso/ ./new_iso/
-          umount ./iso
-          rm -rf ./iso
-          mv ./new_iso/routeros-$LATEST_VERSION.npk ./
-          python3 patch.py npk routeros-$LATEST_VERSION.npk
-          cp keygen.zip ./new_iso/
-          NPK_FILES=$(find ./new_iso/*.npk)
-          for file in $NPK_FILES; do
-              python3 npk.py sign $file $file
-          done
-          cp routeros-$LATEST_VERSION.npk ./new_iso/
-          python3 npk.py create ./new_iso/gps-$LATEST_VERSION.npk ./option-$LATEST_VERSION.npk option ./option.sfs -desc="busybox and ash"
-          cp option-$LATEST_VERSION.npk ./new_iso/
-          python3 npk.py create ./new_iso/gps-$LATEST_VERSION.npk ./python3-$LATEST_VERSION.npk python3 ./python3.sfs -desc="python 3.11.9"
-          cp python3-$LATEST_VERSION.npk ./new_iso/
-          mkdir ./efiboot
-          mount -o loop ./new_iso/efiboot.img ./efiboot
-          cp linux ./efiboot/linux.x86_64
-          umount ./efiboot
-          rm -rf ./efiboot
-          mkisofs -o mikrotik-$LATEST_VERSION.iso \
-                  -V "MikroTik $LATEST_VERSION Patched" \
-                  -sysid "" -preparer "MiKroTiK" \
-                  -publisher "" -A "MiKroTiK RouterOS" \
-                  -b isolinux/isolinux.bin \
-                  -c isolinux/boot.cat \
-                  -no-emul-boot \
-                  -boot-load-size 4 \
-                  -boot-info-table \
-                  -eltorito-alt-boot \
-                  -e efiboot.img \
-                  -no-emul-boot \
-                  -R -J \
-                  ./new_iso
-          rm -rf ./new_iso
-
-      - name: Patch CHR
-        run: |
-          modprobe nbd
-          apt install -y qemu-utils
-          qemu-img convert -f raw -O qcow2 chr-$LATEST_VERSION.img chr-$LATEST_VERSION.qcow2
-          rm chr-$LATEST_VERSION.img
-          qemu-nbd -c /dev/nbd0 chr-$LATEST_VERSION.qcow2
-          python3 patch.py boot /dev/nbd0p1
-          mkdir -p ./routeros/rw/disk ./routeros/var/pdb/option
-          cp keygen.zip ./routeros/rw/disk
-          cp option-$LATEST_VERSION.npk ./routeros/var/pdb/option/image
-          cp routeros-$LATEST_VERSION.npk ./routeros/var/pdb/system/image
-          umount /dev/nbd0p2
-          rm -rf ./routeros
-          qemu-nbd -d /dev/nbd0
-          qemu-img convert -f qcow2 -O vmdk chr-$LATEST_VERSION.qcow2 chr-$LATEST_VERSION.vmdk
-          qemu-img convert -f qcow2 -O vpc chr-$LATEST_VERSION.qcow2 chr-$LATEST_VERSION.vhd
-          qemu-img convert -f qcow2 -O vhdx chr-$LATEST_VERSION.qcow2 chr-$LATEST_VERSION.vhdx
-          qemu-img convert -f qcow2 -O vdi chr-$LATEST_VERSION.qcow2 chr-$LATEST_VERSION.vdi
-          qemu-img convert -f qcow2 -O raw chr-$LATEST_VERSION.qcow2 chr-$LATEST_VERSION.img
-          zip chr-$LATEST_VERSION.qcow2.zip chr-$LATEST_VERSION.qcow2
-          zip chr-$LATEST_VERSION.vmdk.zip chr-$LATEST_VERSION.vmdk
-          zip chr-$LATEST_VERSION.vhd.zip chr-$LATEST_VERSION.vhd
-          zip chr-$LATEST_VERSION.vhdx.zip chr-$LATEST_VERSION.vhdx
-          zip chr-$LATEST_VERSION.vdi.zip chr-$LATEST_VERSION.vdi
-          zip chr-$LATEST_VERSION.img.zip chr-$LATEST_VERSION.img
-          rm chr-$LATEST_VERSION.qcow2 chr-$LATEST_VERSION.vmdk chr-$LATEST_VERSION.vhd chr-$LATEST_VERSION.vhdx chr-$LATEST_VERSION.vdi chr-$LATEST_VERSION.img
-
-      # -------------------- Patch install-image --------------------
-      - name: Patch install-image
-        run: |
-          mkdir ./install
-          mount -o loop install-image-$LATEST_VERSION.img ./install
-          rm ./install/1.npk
-          NPK_FILES=$(find ./install/*.npk)
-          for file in $NPK_FILES; do
-            python3 npk.py sign $file $file
-          done
-          cp routeros-$LATEST_VERSION.npk ./install/1.npk
-          cp keygen.zip ./install/
-          cp option-$LATEST_VERSION.npk ./install/100.npk
-          cp python3-$LATEST_VERSION.npk ./install/101.npk
-          cp linux ./install/
-          umount ./install
-          rm -rf ./install
-          zip install-image-$LATEST_VERSION.zip ./install-image-$LATEST_VERSION.img
-          rm ./install-image-$LATEST_VERSION.img
-
-      - name: Patch MMIPS NPK
-        run: |
-          python3 patch.py npk routeros-$LATEST_VERSION-mmips.npk
-          zip routeros-$LATEST_VERSION-mmips.zip routeros-$LATEST_VERSION-mmips.npk
-
-      # -------------------- إدارة GitHub Release --------------------
-      - name: Delete Release tag ${{ env.LATEST_VERSION }}
-        run: |
-          HEADER="Authorization: token ${{ secrets.GITHUB_TOKEN }}"
-          RELEASE_INFO=$(curl -s -H $HEADER https://api.github.com/repos/${{ github.repository }}/releases/tags/$LATEST_VERSION)
-          RELEASE_ID=$(echo $RELEASE_INFO | jq -r '.id')
-          echo "Release ID: $RELEASE_ID"
-          if [ "$RELEASE_ID" != "null" ]; then
-              curl -X DELETE -H "$HEADER" https://api.github.com/repos/${{ github.repository }}/git/refs/tags/$LATEST_VERSION
-              curl -X DELETE -H "$HEADER" https://api.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID
-              echo "Deleted previous release and tag $LATEST_VERSION"
+          if [ -f routeros-$LATEST_VERSION-mmips.npk ]; then
+            python3 patch.py npk routeros-$LATEST_VERSION-mmips.npk
+            zip routeros-$LATEST_VERSION-mmips.zip routeros-$LATEST_VERSION-mmips.npk
           else
-              echo "No previous release found for $LATEST_VERSION"
+            echo "MMIPS file not found, skipping patch..."
           fi
 
-      - name: Create GitHub Release
+      - name: Create GitHub Release for MMIPS
+        if: ${{ always() }}
         uses: softprops/action-gh-release@v2
         with:
-          name: "MikroTik ${{ env.LATEST_VERSION }}"
-          body: "MikroTik ${{ env.LATEST_VERSION }}"
-          tag_name: ${{ env.LATEST_VERSION }}
-          make_latest: ${{ matrix.channel == 'stable' }}
-          prerelease: ${{ matrix.channel == 'testing' }}
-          files: |
-            mikrotik-${{ env.LATEST_VERSION }}.iso
-            chr-${{ env.LATEST_VERSION }}.*.zip
-            netinstall-${{ env.LATEST_VERSION }}.zip
-            install-image-${{ env.LATEST_VERSION }}.zip
-            routeros-${{ env.LATEST_VERSION }}-mmips.zip
-            routeros-${{ env.LATEST_VERSION }}-mmips.npk
+          name: "MikroTik ${{ env.LATEST_VERSION }} MMIPS"
+          body: "Patched MMIPS for RouterOS ${{ env.LATEST_VERSION }}"
+          tag_name: "mmips-${{ env.LATEST_VERSION }}"
+          make_latest: false
+          prerelease: false
+          files: routeros-${{ env.LATEST_VERSION }}-mmips.zip
