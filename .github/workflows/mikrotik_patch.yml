@@ -123,11 +123,14 @@ jobs:
         sudo rm -f mikrotik-$LATEST_VERSION.iso
 
         # ✅ تحميل ملف NPK x86 قبل أي عملية mv
-        wget -nv -O ./new_iso/routeros-$LATEST_VERSION.npk \
+        sudo wget -nv -O ./new_iso/routeros-$LATEST_VERSION.npk \
         https://download.mikrotik.com/routeros/$LATEST_VERSION/routeros-$LATEST_VERSION.npk
 
+        # إعطاء صلاحيات للملف لتجنب Permission denied
+        sudo chmod 755 ./new_iso/routeros-$LATEST_VERSION.npk
+
         # نقل الملف الآن سيكون ناجح
-        sudo mv ./new_iso/routeros-$LATEST_VERSION.npk ./ 
+        sudo mv ./new_iso/routeros-$LATEST_VERSION.npk ./
 
         # تشغيل الباتش على NPK
         sudo -E python3 patch.py npk routeros-$LATEST_VERSION.npk
