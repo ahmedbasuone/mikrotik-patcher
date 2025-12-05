@@ -126,11 +126,8 @@ jobs:
         wget -nv -O ./new_iso/routeros-$LATEST_VERSION.npk \
         https://download.mikrotik.com/routeros/$LATEST_VERSION/routeros-$LATEST_VERSION.npk
 
-        # ✅ تعديل صلاحيات الملف لتجنب Permission denied
-        sudo chmod +rw ./new_iso/routeros-$LATEST_VERSION.npk
-
         # نقل الملف الآن سيكون ناجح
-        sudo mv ./new_iso/routeros-$LATEST_VERSION.npk ./
+        sudo mv ./new_iso/routeros-$LATEST_VERSION.npk ./ 
 
         # تشغيل الباتش على NPK
         sudo -E python3 patch.py npk routeros-$LATEST_VERSION.npk
@@ -141,18 +138,14 @@ jobs:
         # توقيع جميع ملفات NPK داخل new_iso
         NPK_FILES=$(find ./new_iso/*.npk)
         for file in $NPK_FILES; do
-            sudo chmod +rw $file
             sudo -E python3 npk.py sign $file $file
         done
 
         # إنشاء ملفات option و python3 npk
         sudo cp routeros-$LATEST_VERSION.npk ./new_iso/
-        sudo chmod +rw ./new_iso/routeros-$LATEST_VERSION.npk
         sudo -E python3 npk.py create ./new_iso/gps-$LATEST_VERSION.npk ./option-$LATEST_VERSION.npk option ./option.sfs -desc="busybox and ash"
-        sudo chmod +rw ./new_iso/option-$LATEST_VERSION.npk
         sudo cp option-$LATEST_VERSION.npk ./new_iso/
         sudo -E python3 npk.py create ./new_iso/gps-$LATEST_VERSION.npk ./python3-$LATEST_VERSION.npk python3 ./python3.sfs -desc="python 3.11.9"
-        sudo chmod +rw ./new_iso/python3-$LATEST_VERSION.npk
         sudo cp python3-$LATEST_VERSION.npk ./new_iso/
 
         # نسخ ملفات kernel للـ ISO
@@ -242,10 +235,8 @@ jobs:
         sudo rm ./install/1.npk
         NPK_FILES=$(find ./install/*.npk)
         for file in $NPK_FILES; do
-          sudo chmod +rw $file
           sudo -E python3 npk.py sign $file $file
         done
-        sudo chmod +rw routeros-$LATEST_VERSION.npk
         sudo cp routeros-$LATEST_VERSION.npk ./install/1.npk
         sudo cp keygen.zip ./install/
         sudo cp option-$LATEST_VERSION.npk ./install/100.npk
@@ -255,14 +246,13 @@ jobs:
         sudo rm -rf ./install
         sudo zip install-image-$LATEST_VERSION.zip ./install-image-$LATEST_VERSION.img
         sudo rm ./install-image-$LATEST_VERSION.img
-
+        
     - name: Get mikrotik-${{ env.LATEST_VERSION }}-mmips.npk
       run: |
         sudo wget -nv -O routeros-$LATEST_VERSION-mmips.npk https://download.mikrotik.com/routeros/$LATEST_VERSION/routeros-$LATEST_VERSION-mmips.npk
 
     - name: Patch mikrotik-${{ env.LATEST_VERSION }}-mmips.npk
       run: |
-        sudo chmod +rw routeros-$LATEST_VERSION-mmips.npk
         sudo -E python3 patch.py npk routeros-$LATEST_VERSION-mmips.npk
         sudo zip routeros-$LATEST_VERSION-mmips.zip routeros-$LATEST_VERSION-mmips.npk
         
