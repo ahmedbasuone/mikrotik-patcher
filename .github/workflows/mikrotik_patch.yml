@@ -103,51 +103,6 @@ jobs:
         sudo -E python3 patch.py netinstall netinstall.exe
         sudo zip netinstall-$LATEST_VERSION.zip ./netinstall.exe
 
-    - name: Get chr-${{ env.LATEST_VERSION }}.img
-      run: |
-        sudo wget -nv -O chr-$LATEST_VERSION.img.zip https://download.mikrotik.com/routeros/$LATEST_VERSION/chr-$LATEST_VERSION.img.zip
-        sudo unzip chr-$LATEST_VERSION.img.zip
-        sudo rm chr-$LATEST_VERSION.img.zip
-        
-    - name: Patch chr-${{ env.LATEST_VERSION }}.img
-      run: |
-        sudo modprobe nbd
-        sudo apt install -y qemu-utils > /dev/null
-        sudo qemu-img convert -f raw -O qcow2 chr-$LATEST_VERSION.img chr-$LATEST_VERSION.qcow2
-        sudo rm chr-$LATEST_VERSION.img
-        sudo qemu-nbd -c /dev/nbd0 chr-$LATEST_VERSION.qcow2
-        sudo -E python3 patch.py boot /dev/nbd0p1
-        sudo mkdir ./routeros
-        sudo mount /dev/nbd0p2 ./routeros
-        sudo mkdir -p ./routeros/rw/disk
-        sudo cp keygen.zip ./routeros/rw/disk
-        sudo mkdir -p ./routeros/var/pdb/option
-        sudo cp option-$LATEST_VERSION.npk ./routeros/var/pdb/option/image
-        sudo cp routeros-$LATEST_VERSION.npk ./routeros/var/pdb/system/image
-        sudo umount /dev/nbd0p2
-        sudo rm -rf ./routeros
-        sudo qemu-nbd -d /dev/nbd0
-
-        sudo qemu-img convert -f qcow2 -O vmdk chr-$LATEST_VERSION.qcow2 chr-$LATEST_VERSION.vmdk
-        sudo qemu-img convert -f qcow2 -O vpc chr-$LATEST_VERSION.qcow2 chr-$LATEST_VERSION.vhd
-        sudo qemu-img convert -f qcow2 -O vhdx chr-$LATEST_VERSION.qcow2 chr-$LATEST_VERSION.vhdx
-        sudo qemu-img convert -f qcow2 -O vdi chr-$LATEST_VERSION.qcow2 chr-$LATEST_VERSION.vdi
-        sudo qemu-img convert -f qcow2 -O raw chr-$LATEST_VERSION.qcow2 chr-$LATEST_VERSION.img
-
-        sudo zip chr-$LATEST_VERSION.qcow2.zip chr-$LATEST_VERSION.qcow2
-        sudo zip chr-$LATEST_VERSION.vmdk.zip chr-$LATEST_VERSION.vmdk
-        sudo zip chr-$LATEST_VERSION.vhd.zip chr-$LATEST_VERSION.vhd
-        sudo zip chr-$LATEST_VERSION.vhdx.zip chr-$LATEST_VERSION.vhdx
-        sudo zip chr-$LATEST_VERSION.vdi.zip chr-$LATEST_VERSION.vdi
-        sudo zip chr-$LATEST_VERSION.img.zip chr-$LATEST_VERSION.img
-
-        sudo rm chr-$LATEST_VERSION.qcow2
-        sudo rm chr-$LATEST_VERSION.vmdk
-        sudo rm chr-$LATEST_VERSION.vhd
-        sudo rm chr-$LATEST_VERSION.vhdx
-        sudo rm chr-$LATEST_VERSION.vdi
-        sudo rm chr-$LATEST_VERSION.img
-
     - name: Get install-image-${{ env.LATEST_VERSION }}.img
       run: |
         sudo wget -nv -O install-image-$LATEST_VERSION.zip https://download.mikrotik.com/routeros/$LATEST_VERSION/install-image-$LATEST_VERSION.zip
@@ -206,7 +161,6 @@ jobs:
         make_latest:  ${{ matrix.channel == 'stable' }}
         prerelease:  ${{ matrix.channel == 'testing' }}
         files: |
-          chr-${{ env.LATEST_VERSION }}.*.zip
           netinstall-${{ env.LATEST_VERSION }}.zip
           install-image-${{ env.LATEST_VERSION }}.zip
           routeros-${{ env.LATEST_VERSION }}-mmips.zip
